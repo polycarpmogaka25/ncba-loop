@@ -139,15 +139,14 @@ public class CountryIntegrationService {
         return repository.findAll(pageable);
     }
 
-    public CountryInfo getCountryById(Long id) {
+    public ResponseEntity<CountryInfo> getCountryById(Long id) {
         return repository.findById(id)
-                .orElseThrow(() ->
-                        new ResourceNotFoundException(
-                                "Country not found with id " + id));
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @Transactional
-    public CountryInfo updateCountry(Long id, @Valid CountryInfo request) {
+    public ResponseEntity<CountryInfo> updateCountry(Long id, @Valid CountryInfo request) {
         return repository.findById(id).map(existing -> {
             existing.setName(request.getName());
             existing.setCapitalCity(request.getCapitalCity());
@@ -158,16 +157,7 @@ public class CountryIntegrationService {
                 existing.getLanguages().addAll(request.getLanguages());
             }
             return ResponseEntity.ok(repository.save(existing));
-        }).orElse(ResponseEntity.notFound().build()).getBody();
+        }).orElse(ResponseEntity.notFound().build());
     }
 
-    @Transactional
-    public void deleteCountry(Long id) {
-
-        var existing = getCountryById(id);
-
-        repository.delete(existing);
-
-        log.info("Deleted country id={}", id);
-    }
 }
