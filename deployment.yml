@@ -14,7 +14,7 @@ metadata:
   name: country-service-secret
 type: Opaque
 data:
-  # store it in secrets
+  # store it in secrets(base 64 password)
   DB_PASSWORD: cGFzc3dvcmQ=
 ---
 apiVersion: apps/v1
@@ -36,7 +36,7 @@ spec:
     spec:
       containers:
         - name: microservice
-          image: https://github.com/polycarpmogaka25/ncba-loop/country-integration-service:latest
+          image: {{IMG_URL}}:latest
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 8080

@@ -351,10 +351,10 @@ SOAP calls have connection and read timeouts configured.
 
 ## Retries
 
-Resilience4j Retry automatically retries transient failures.
+Resilience Retry automatically retries transient failures.
 
 ```java
-@Retry(name = "countrySoap")
+@Retry(name = "countrySoap");
 ```
 
 ## Circuit Breaker
@@ -362,7 +362,7 @@ Resilience4j Retry automatically retries transient failures.
 Prevents cascading failures when SOAP service is unavailable.
 
 ```java
-@CircuitBreaker(name = "countrySoap")
+@CircuitBreaker(name = "countrySoap");
 ```
 
 ## Fallbacks
@@ -451,7 +451,7 @@ kubectl get pods
 
 # Scaling Strategy
 
-The service is stateless and designed for horizontal scaling.
+The service is stateless and designed for HPA.
 
 Example:
 
@@ -519,7 +519,6 @@ kubectl logs -f country-service
 ## Check Deployment
 
 ```bash
-kubectl get deployment
 kubectl describe deployment country-service
 ```
 
