@@ -1,7 +1,6 @@
 package com.integration.ncba.test.service;
 
 
-import com.integration.ncba.test.exception.ResourceNotFoundException;
 import com.integration.ncba.test.exception.UpstreamServiceException;
 import com.integration.ncba.test.models.CountryInfo;
 import com.integration.ncba.test.models.Language;
@@ -15,15 +14,12 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
 import java.util.ArrayList;
@@ -32,6 +28,7 @@ import java.util.List;
 @Service
 @Slf4j
 @RequiredArgsConstructor
+@SuppressWarnings("all")
 public class CountryIntegrationService {
 
     private final CountryInfoRepository repository;
@@ -60,7 +57,8 @@ public class CountryIntegrationService {
     }
 
     private String toSentenceCase(String input) {
-        if (input == null || input.isBlank()) return "";
+        if (input == null || input.isBlank())
+            return "";
         input = input.trim().toLowerCase();
         return Character.toUpperCase(input.charAt(0)) + input.substring(1);
     }
@@ -113,9 +111,9 @@ public class CountryIntegrationService {
             var langNodes = doc.getElementsByTagName("m:tLanguage");
             List<Language> languages = new ArrayList<>();
             for (int i = 0; i < langNodes.getLength(); i++) {
-                Element el = (Element) langNodes.item(i);
-                String lCode = el.getElementsByTagName("m:sISOCode").item(0).getTextContent();
-                String lName = el.getElementsByTagName("m:sName").item(0).getTextContent();
+                var el = (Element) langNodes.item(i);
+                var lCode = el.getElementsByTagName("m:sISOCode").item(0).getTextContent();
+                var lName = el.getElementsByTagName("m:sName").item(0).getTextContent();
                 languages.add(new Language(null, lCode, lName));
             }
             info.setLanguages(languages);
@@ -130,9 +128,9 @@ public class CountryIntegrationService {
     @Retry(name = "countrySoap")
     @CircuitBreaker(name = "countrySoap")
     private ResponseEntity<String> callSoapEndpoint(String payload) {
-        HttpHeaders headers = new HttpHeaders();
+        var headers = new HttpHeaders();
         headers.setContentType(MediaType.TEXT_XML);
-        HttpEntity<String> entity = new HttpEntity<>(payload, headers);
+        var entity = new HttpEntity<>(payload, headers);
         return restTemplate.postForEntity(soapUrl, entity, String.class);
     }
 
