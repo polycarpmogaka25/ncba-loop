@@ -1,11 +1,12 @@
-FROM maven:3.9.6-eclipse-temurin-21 AS build
+FROM registry.access.redhat.com/ubi9/openjdk-21-runtime
 
-ENV PORT 8080
-
+ENV PORT=8080
 ENV TZ=Africa/Nairobi
 
 COPY target/*.jar /opt/application.jar
 
 WORKDIR /opt
 
-ENTRYPOINT ["java","-jar","application.jar"]
+EXPOSE 8080
+
+ENTRYPOINT ["java","-jar","/opt/application.jar"]
