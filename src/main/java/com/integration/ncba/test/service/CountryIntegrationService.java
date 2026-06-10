@@ -5,6 +5,7 @@ import com.integration.ncba.test.exception.ResourceNotFoundException;
 import com.integration.ncba.test.exception.UpstreamServiceException;
 import com.integration.ncba.test.models.CountryInfo;
 import com.integration.ncba.test.models.Language;
+import com.integration.ncba.test.models.dto.Country;
 import com.integration.ncba.test.repo.CountryInfoRepository;
 import com.integration.ncba.test.utils.Utils;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
@@ -46,7 +47,7 @@ public class CountryIntegrationService {
         var formattedName = toSentenceCase(rawName);
         log.info("Processing inbound integration request for country: {}", formattedName);
 
-        String isoCode = fetchIsoCodeFromSoap(formattedName);
+        var isoCode = fetchIsoCodeFromSoap(formattedName);
         if (isoCode == null || isoCode.trim().isEmpty() || isoCode.contains("No country found")) {
             throw new RuntimeException("ISO Code not found for country: " + formattedName);
         }
@@ -77,8 +78,9 @@ public class CountryIntegrationService {
                 """.formatted(countryName);
 
         try {
-            ResponseEntity<String> response = callSoapEndpoint(soapEnvelope);
-            Document doc = this.utils.parseXml(response.getBody());
+            var response = callSoapEndpoint(soapEnvelope);
+            assert response.getBody() != null;
+            var doc = this.utils.parseXml(response.getBody());
             return doc.getElementsByTagName("m:CountryISOCodeResult").item(0).getTextContent();
         } catch (Exception e) {
             log.error("Failed to fetch ISO Code for country {}", countryName, e);
@@ -135,8 +137,8 @@ public class CountryIntegrationService {
     }
 
 
-    public Page<CountryInfo> getAllCountries(Pageable pageable) {
-        return repository.findAll(pageable);
+    public List<CountryInfo> getAllCountries() {
+        return repository.findAll();
     }
 
     public ResponseEntity<CountryInfo> getCountryById(Long id) {
@@ -146,9 +148,8 @@ public class CountryIntegrationService {
     }
 
     @Transactional
-    public ResponseEntity<CountryInfo> updateCountry(Long id, @Valid CountryInfo request) {
+    public ResponseEntity<CountryInfo> updateCountry(Long id, @Valid Country request) {
         return repository.findById(id).map(existing -> {
-            existing.setName(request.getName());
             existing.setCapitalCity(request.getCapitalCity());
             existing.setPhoneCode(request.getPhoneCode());
             existing.setContinentCode(request.getContinentCode());

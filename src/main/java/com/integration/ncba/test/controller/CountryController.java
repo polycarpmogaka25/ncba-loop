@@ -1,6 +1,7 @@
 package com.integration.ncba.test.controller;
 
 import com.integration.ncba.test.models.CountryInfo;
+import com.integration.ncba.test.models.dto.Country;
 import com.integration.ncba.test.models.dto.CountryRequest;
 import com.integration.ncba.test.repo.CountryInfoRepository;
 import com.integration.ncba.test.service.CountryIntegrationService;
@@ -12,7 +13,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/countries")
@@ -35,7 +35,7 @@ public class CountryController {
 
     @GetMapping
     public List<CountryInfo> getAllCountries() {
-        return repository.findAll();
+        return integrationService.getAllCountries();
     }
 
     @GetMapping("/{id}")
@@ -44,7 +44,7 @@ public class CountryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CountryInfo> updateCountry(@PathVariable Long id, @RequestBody CountryInfo updatedData) {
+    public ResponseEntity<CountryInfo> updateCountry(@PathVariable Long id, @RequestBody Country updatedData) {
         return integrationService.updateCountry(id, updatedData);
     }
 

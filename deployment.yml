@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: country-service-config
+  namespace: ncba-loop-integration-tests
 data:
   DB_HOST: "mysql-service"
   DB_PORT: "3306"
@@ -12,6 +13,7 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: country-service-secret
+  namespace: ncba-loop-integration-tests
 type: Opaque
 data:
   # store it in secrets(base 64 password)
@@ -23,7 +25,7 @@ metadata:
   name: country-integration-app
   labels:
     app: country-integration
-namespace: ncba-loop-integration-tests
+  namespace: ncba-loop-integration-tests
 spec:
   replicas: 3
   selector:
@@ -50,9 +52,6 @@ spec:
                   name: country-service-secret
                   key: DB_PASSWORD
           resources:
-            limits:
-              cpu: "500m"
-              memory: "512Mi"
             requests:
               cpu: "250m"
               memory: "256Mi"
@@ -73,6 +72,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: country-integration-service
+  namespace: ncba-loop-integration-tests
 spec:
   type: ClusterIP
   ports:
