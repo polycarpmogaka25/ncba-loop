@@ -15,7 +15,7 @@ metadata:
 type: Opaque
 data:
   # store it in secrets
-  DB_PASSWORD: password
+  DB_PASSWORD: cGFzc3dvcmQ=
 ---
 apiVersion: apps/v1
 kind: Deployment
