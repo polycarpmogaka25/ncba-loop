@@ -2,13 +2,13 @@
 
 ## Overview
 
-This project demonstrates integration between REST and SOAP services using Spring Boot. 
+This project demonstrates integration between REST and SOAP services using Spring Boot.
 The application receives a country name via a REST API,
 retrieves the ISO country code from a SOAP service, fetches detailed country information,
-stores the information in MySQL, 
+stores the information in MySQL,
 and exposes CRUD operations for managing the stored data.
 
-The solution follows enterprise integration patterns, production-ready deployment practices, 
+The solution follows enterprise integration patterns, production-ready deployment practices,
 and cloud-native principles suitable for Kubernetes environments.
 
 ---
@@ -47,7 +47,7 @@ CRUD APIs
 ### Components
 
 | Component        | Responsibility                          |
-| ---------------- | --------------------------------------- |
+|------------------|-----------------------------------------|
 | REST Controller  | Receives requests and returns responses |
 | Service Layer    | Business logic and orchestration        |
 | SOAP Client      | Calls CountryInfo SOAP services         |
@@ -87,7 +87,9 @@ SOAP Operations Used:
 Input:
 
 ```xml
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:web="http://www.oorsprong.org/websamples.countryinfo">
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:web="http://www.oorsprong.org/websamples.countryinfo">
     <soapenv:Header/>
     <soapenv:Body>
         <web:CountryISOCode>
@@ -100,6 +102,7 @@ Input:
 Response:
 
 ```xml
+
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <m:CountryISOCodeResponse xmlns:m="http://www.oorsprong.org/websamples.countryinfo">
@@ -114,7 +117,9 @@ Response:
 Input:
 
 ```xml
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:web="http://www.oorsprong.org/websamples.countryinfo">
+
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+                  xmlns:web="http://www.oorsprong.org/websamples.countryinfo">
     <soapenv:Header/>
     <soapenv:Body>
         <web:FullCountryInfo>
@@ -127,6 +132,7 @@ Input:
 Response:
 
 ```xml
+
 <soap:Envelope xmlns:soap="http://schemas.xmlsoap.org/soap/envelope/">
     <soap:Body>
         <m:FullCountryInfoResponse xmlns:m="http://www.oorsprong.org/websamples.countryinfo">
@@ -157,7 +163,7 @@ Response:
 ## CountryInfo
 
 | Column          | Type    |
-| --------------- | ------- |
+|-----------------|---------|
 | id              | BIGINT  |
 | isoCode         | VARCHAR |
 | countryName     | VARCHAR |
@@ -170,7 +176,7 @@ Response:
 ## Language
 
 | Column       | Type    |
-| ------------ | ------- |
+|--------------|---------|
 | id           | BIGINT  |
 | languageName | VARCHAR |
 | iso639_1     | VARCHAR |
@@ -314,18 +320,18 @@ Standard Response Format:
 
 ```json
 {
-  "timestamp":"2026-08-01T10:00:00",
-  "status":404,
-  "error":"Not Found",
-  "message":"Country not found",
-  "path":"/api/v1/countries/100"
+  "timestamp": "2026-08-01T10:00:00",
+  "status": 404,
+  "error": "Not Found",
+  "message": "Country not found",
+  "path": "/api/v1/countries/100"
 }
 ```
 
 HTTP Status Codes:
 
 | Code | Meaning               |
-| ---- | --------------------- |
+|------|-----------------------|
 | 200  | Success               |
 | 201  | Created               |
 | 400  | Bad Request           |
@@ -347,7 +353,7 @@ SOAP calls have connection and read timeouts configured.
 Resilience4j Retry automatically retries transient failures.
 
 ```java
-@Retry(name="countrySoap")
+@Retry(name = "countrySoap")
 ```
 
 ## Circuit Breaker
@@ -355,7 +361,7 @@ Resilience4j Retry automatically retries transient failures.
 Prevents cascading failures when SOAP service is unavailable.
 
 ```java
-@CircuitBreaker(name="countrySoap")
+@CircuitBreaker(name = "countrySoap")
 ```
 
 ## Fallbacks
@@ -372,10 +378,10 @@ Example:
 
 ```json
 {
-  "timestamp":"2026-08-01T12:00:00",
-  "level":"INFO",
-  "traceId":"abc123",
-  "message":"Country information successfully retrieved"
+  "timestamp": "2026-08-01T12:00:00",
+  "level": "INFO",
+  "traceId": "abc123",
+  "message": "Country information successfully retrieved"
 }
 ```
 
@@ -428,19 +434,6 @@ EXPOSE 8080
 ENTRYPOINT ["java","-jar","/opt/application.jar"]
 ```
 
-Build Image:
-
-```bash
-docker build -t country-service:1.0 .
-```
-
-Run Image:
-
-```bash
-docker run -p 8080:8080 country-service:1.0
-```
-
----
 ## Deployment
 
 ```bash
@@ -451,7 +444,6 @@ Verify:
 
 ```bash
 kubectl get pods
-kubectl get svc
 ```
 
 ---
@@ -508,19 +500,19 @@ kubectl get pods
 ## Describe Pod
 
 ```bash
-kubectl describe pod <pod-name>
+kubectl describe pod country-service
 ```
 
 ## View Logs
 
 ```bash
-kubectl logs <pod-name>
+kubectl logs country-service
 ```
 
 Follow Logs:
 
 ```bash
-kubectl logs -f <pod-name>
+kubectl logs -f country-service
 ```
 
 ## Check Deployment
@@ -545,7 +537,7 @@ kubectl get endpoints
 ## Execute Inside Pod
 
 ```bash
-kubectl exec -it <pod-name> -- sh
+kubectl exec -it country-service -- sh
 ```
 
 ## Restart Deployment
@@ -589,7 +581,6 @@ kubectl rollout undo deployment country-service
 * Structured logging
 * Metrics
 * Health endpoints
-* Distributed tracing support
 
 ---
 
@@ -622,7 +613,5 @@ curl http://localhost:8080/api/v1/countries/1
 # GitHub Repository
 
 ```text
-https://github.com/<username>/country-service
+https://github.com/polycarpmogaka25/ncba-loop.git
 ```
-
-Submit repository link before the deadline and ensure all source code, Docker artifacts, Kubernetes manifests, and documentation are committed.

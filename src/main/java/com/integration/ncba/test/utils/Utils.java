@@ -11,7 +11,7 @@ import java.nio.charset.StandardCharsets;
 @Service
 public class Utils {
 
-    private Document parseXml(String xml) throws Exception {
+    public Document parseXml(String xml) throws Exception {
 
         DocumentBuilderFactory factory =
                 DocumentBuilderFactory.newInstance();

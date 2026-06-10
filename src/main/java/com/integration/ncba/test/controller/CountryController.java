@@ -1,83 +1,67 @@
 package com.integration.ncba.test.controller;
 
 import com.integration.ncba.test.models.CountryInfo;
-import com.integration.ncba.test.models.dto.CountryRequest;
+import com.integration.ncba.test.repo.CountryInfoRepository;
 import com.integration.ncba.test.service.CountryIntegrationService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/v1/countries")
+@RequestMapping("/api/countries")
 @RequiredArgsConstructor
-@Slf4j
 public class CountryController {
 
-    private final CountryIntegrationService countryService;
+    private final CountryIntegrationService integrationService;
 
-    @PostMapping
-    public ResponseEntity<CountryInfo> integrateCountry(
-            @Valid @RequestBody CountryRequest request) {
+    private final CountryInfoRepository repository;
 
-        log.info("Received integration request for country={}", request.getName());
-
-        CountryInfo countryInfo =
-                countryService.processCountryInbound(request.getName());
-
-        log.info("Successfully integrated country={}", countryInfo.getName());
-
-        return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(countryInfo);
+    @PostMapping("/integrate")
+    public ResponseEntity<CountryInfo> integrateCountry(@RequestBody Map<String, String> payload) {
+        String countryName = payload.get("name");
+        if (countryName == null || countryName.isBlank()) {
+            return ResponseEntity.badRequest().build();
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(integrationService.processCountryInbound(countryName));
     }
 
     @GetMapping
-    public ResponseEntity<Page<CountryInfo>> getAllCountries(
-            Pageable pageable) {
-
-        log.info("Fetching all countries");
-
-        return ResponseEntity.ok(
-                countryService.getAllCountries(pageable)
-        );
+    public List<CountryInfo> getAllCountries() {
+        return repository.findAll();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<CountryInfo> getCountryById(
-            @PathVariable Long id) {
-
-        log.info("Fetching country id={}", id);
-
-        return ResponseEntity.ok(
-                countryService.getCountryById(id)
-        );
+    public ResponseEntity<CountryInfo> getCountryById(@PathVariable Long id) {
+        return repository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<CountryInfo> updateCountry(
-            @PathVariable Long id,
-            @Valid @RequestBody CountryInfo request) {
-
-        log.info("Updating country id={}", id);
-
-        return ResponseEntity.ok(
-                countryService.updateCountry(id, request)
-        );
+    public ResponseEntity<CountryInfo> updateCountry(@PathVariable Long id, @RequestBody CountryInfo updatedData) {
+        return repository.findById(id).map(existing -> {
+            existing.setName(updatedData.getName());
+            existing.setCapitalCity(updatedData.getCapitalCity());
+            existing.setPhoneCode(updatedData.getPhoneCode());
+            existing.setContinentCode(updatedData.getContinentCode());
+            if (updatedData.getLanguages() != null) {
+                existing.getLanguages().clear();
+                existing.getLanguages().addAll(updatedData.getLanguages());
+            }
+            return ResponseEntity.ok(repository.save(existing));
+        }).orElse(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCountry(
-            @PathVariable Long id) {
-
-        log.info("Deleting country id={}", id);
-
-        countryService.deleteCountry(id);
-
+    public ResponseEntity<Void> deleteCountry(@PathVariable Long id) {
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+        repository.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

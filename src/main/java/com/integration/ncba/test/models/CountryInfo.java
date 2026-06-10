@@ -1,7 +1,11 @@
 package com.integration.ncba.test.models;
 
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +22,7 @@ public class CountryInfo {
 
     @Column(unique = true, nullable = false)
     private String isoCode;
-    
+
     private String name;
     private String capitalCity;
     private String phoneCode;

@@ -7,6 +7,8 @@ import com.integration.ncba.test.models.CountryInfo;
 import com.integration.ncba.test.models.Language;
 import com.integration.ncba.test.repo.CountryInfoRepository;
 import com.integration.ncba.test.utils.Utils;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,15 +16,15 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.w3c.dom.*;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,7 +78,7 @@ public class CountryIntegrationService {
 
         try {
             ResponseEntity<String> response = callSoapEndpoint(soapEnvelope);
-            Document doc = parseXml(response.getBody());
+            Document doc = this.utils.parseXml(response.getBody());
             return doc.getElementsByTagName("m:CountryISOCodeResult").item(0).getTextContent();
         } catch (Exception e) {
             log.error("Failed to fetch ISO Code for country {}", countryName, e);
@@ -98,7 +100,7 @@ public class CountryIntegrationService {
 
         try {
             var response = callSoapEndpoint(soapEnvelope);
-            Document doc = parseXml(response.getBody());
+            var doc = this.utils.parseXml(response.getBody());
 
             var info = new CountryInfo();
             info.setIsoCode(doc.getElementsByTagName("m:sISOCode").item(0).getTextContent());
@@ -106,7 +108,7 @@ public class CountryIntegrationService {
             info.setPhoneCode(doc.getElementsByTagName("m:sPhoneCode").item(0).getTextContent());
             info.setContinentCode(doc.getElementsByTagName("m:sContinentCode").item(0).getTextContent());
 
-            NodeList langNodes = doc.getElementsByTagName("m:tLanguage");
+            var langNodes = doc.getElementsByTagName("m:tLanguage");
             List<Language> languages = new ArrayList<>();
             for (int i = 0; i < langNodes.getLength(); i++) {
                 Element el = (Element) langNodes.item(i);
@@ -132,12 +134,6 @@ public class CountryIntegrationService {
         return restTemplate.postForEntity(soapUrl, entity, String.class);
     }
 
-    private Document parseXml(String xml) throws Exception {
-        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-        factory.setNamespaceAware(true);
-        DocumentBuilder builder = factory.newDocumentBuilder();
-        return builder.parse(new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8)));
-    }
 
     public Page<CountryInfo> getAllCountries(Pageable pageable) {
         return repository.findAll(pageable);
@@ -150,6 +146,7 @@ public class CountryIntegrationService {
                                 "Country not found with id " + id));
     }
 
+    @Transactional
     public CountryInfo updateCountry(Long id, @Valid CountryInfo request) {
         return repository.findById(id).map(existing -> {
             existing.setName(request.getName());
