@@ -2,15 +2,11 @@ spring:
   application:
     name: test-integration-service
   datasource:
-    #    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:country_db}?createDatabaseIfNotExist=true&useSSL=false
-    url: jdbc:h2:mem:country_db;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: root
-    password: password
+        url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:country_db}?createDatabaseIfNotExist=true&useSSL=false
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
 
 # Custom SOAP Configuration
 soap:
